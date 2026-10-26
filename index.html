@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geetanjli Restaurant Bill Collector — POS & Billing System</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- =========================================================================
+       LOGIN GATEWAY OVERLAY
+       ========================================================================= -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">⚜</div>
+        <h1 class="login-title">GEETANJLI RESTAURANT</h1>
+        <p class="login-sub">Staff & Cashier POS Terminal Authentication</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="loginUser">Username / Staff ID</label>
+          <input type="text" id="loginUser" placeholder="Enter username (e.g. admin)" autocomplete="username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="loginPass">Password</label>
+          <input type="password" id="loginPass" placeholder="Enter password (e.g. geetanjli@123)" autocomplete="current-password" required>
+        </div>
+
+        <div class="login-error" id="loginErrorMsg"></div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <span>🔐</span> Log In to POS Terminal
+        </button>
+
+        <!-- Quick Demo Credentials Box -->
+        <div class="demo-creds-box">
+          <div class="demo-creds-title">⚡ Quick Demo Credentials (Click to Autofill):</div>
+          <div class="demo-buttons">
+            <button type="button" class="demo-btn" onclick="quickFillCreds('admin', 'geetanjli@123')">
+              <strong>Admin / Manager:</strong> admin / geetanjli@123
+            </button>
+            <button type="button" class="demo-btn" onclick="quickFillCreds('cashier1', 'pos@2026')">
+              <strong>Cashier:</strong> cashier1 / pos@2026
+            </button>
+            <button type="button" class="demo-btn" onclick="quickFillCreds('staff', '1234')">
+              <strong>Floor Staff:</strong> staff / 1234
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       TOP NAVIGATION & POS CONTROLS
+       ========================================================================= -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-block">
+        <div class="brand-logo">⚜</div>
+        <div>
+          <h1 class="restaurant-name" data-i18n="appTitle">GEETANJLI RESTAURANT</h1>
+          <p class="restaurant-tagline" data-i18n="appSubtitle">“Delicious Food, Wonderful Moments” &bull; Smart POS & Billing Terminal</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Multi-Language Selector -->
+        <div class="lang-selector-wrap">
+          <span class="ctrl-icon">🌐</span>
+          <select id="langSelect" class="lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+          </select>
+        </div>
+
+        <!-- Light / Dark Mode Toggle -->
+        <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+          <span id="themeIcon">🌙</span>
+        </button>
+
+        <!-- User Profile & Logout -->
+        <div class="user-profile-badge" id="userProfileBadge">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-info-text">
+            <span class="user-name" id="dispUserName">Manager</span>
+            <span class="user-role" id="dispUserRole">Admin</span>
+          </div>
+          <button id="btnLogout" class="logout-btn" title="Log out from POS">
+            <span>🚪</span> <span data-i18n="logout">Logout</span>
+          </button>
+        </div>
+
+        <!-- Live Clock -->
+        <div class="live-clock" id="liveClock">Loading time...</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       MAIN POS APP WORKSPACE
+       ========================================================================= -->
+  <main class="main-layout">
+    
+    <!-- LEFT PANEL: Customer Info + Menu Browser -->
+    <section class="panel left-panel">
+
+      <!-- Customer Details Card -->
+      <div class="card customer-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="icon">👤</span> <span data-i18n="customerHeader">Customer & Table Details</span>
+          </h2>
+          <span class="required-note" data-i18n="mandatoryNote">* Mandatory fields</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="custName"><span data-i18n="labelCustName">Customer Name</span> <span class="req">*</span></label>
+            <input type="text" id="custName" placeholder="e.g. Rajesh Kumar" autocomplete="off" required>
+          </div>
+          <div class="form-group">
+            <label for="custPhone"><span data-i18n="labelCustPhone">Mobile Number (10-Digit)</span> <span class="req">*</span></label>
+            <div class="phone-input-wrapper">
+              <span class="prefix">+91</span>
+              <input type="tel" id="custPhone" maxlength="10" placeholder="9876543210" autocomplete="off" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="custTable"><span data-i18n="labelCustTable">Table Number</span> <span class="req">*</span></label>
+            <input type="number" id="custTable" min="1" max="200" placeholder="e.g. 5" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Restaurant Menu Card -->
+      <div class="card menu-card">
+        <div class="card-header menu-header-wrap">
+          <div>
+            <h2 class="card-title">
+              <span class="icon">🍽️</span> <span data-i18n="menuHeader">Restaurant Menu (16 Items)</span>
+            </h2>
+            <p class="card-subtitle" data-i18n="menuSub">Click item or use quantity stepper to add to cart</p>
+          </div>
+          <div class="search-wrap">
+            <input type="text" id="menuSearch" placeholder="🔍 Search dishes..." autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Category Filters -->
+        <nav class="category-tabs" id="categoryTabs">
+          <button class="cat-btn active" data-category="All" data-i18n="catAll">All Items (16)</button>
+          <button class="cat-btn" data-category="Starters" data-i18n="catStarters">Starters (4)</button>
+          <button class="cat-btn" data-category="Main Course" data-i18n="catMainCourse">Main Course (4)</button>
+          <button class="cat-btn" data-category="Breads" data-i18n="catBreads">Breads (4)</button>
+          <button class="cat-btn" data-category="Desserts" data-i18n="catDesserts">Desserts (2)</button>
+          <button class="cat-btn" data-category="Beverages" data-i18n="catBeverages">Beverages (2)</button>
+        </nav>
+
+        <!-- Menu Grid -->
+        <div class="menu-grid" id="menuGrid">
+          <!-- Populated dynamically via app.js -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT PANEL: Order Cart + Calculation Summary + Action Buttons -->
+    <section class="panel right-panel">
+
+      <!-- Order Cart Card -->
+      <div class="card cart-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <span class="icon">🛒</span> <span data-i18n="cartHeader">Current Order / Cart</span>
+            </h2>
+            <p class="card-subtitle" id="cartSummaryCount">0 items (0 portions)</p>
+          </div>
+          <button class="btn btn-sm btn-ghost" id="btnClearCart" title="Clear all items in cart" data-i18n="clearCart">Clear Cart</button>
+        </div>
+
+        <!-- Cart Table Wrapper -->
+        <div class="cart-table-wrapper">
+          <table class="cart-table" id="cartTable">
+            <thead>
+              <tr>
+                <th style="width: 8%;" data-i18n="colId">ID</th>
+                <th style="width: 44%;" data-i18n="colItem">Item</th>
+                <th style="width: 18%; text-align: right;" data-i18n="colPrice">Price</th>
+                <th style="width: 15%; text-align: center;" data-i18n="colQty">Qty</th>
+                <th style="width: 15%; text-align: right;" data-i18n="colTotal">Total</th>
+                <th style="width: 5%;"></th>
+              </tr>
+            </thead>
+            <tbody id="cartTableBody">
+              <!-- Cart rows populated dynamically -->
+            </tbody>
+          </table>
+          <div class="empty-cart-state" id="emptyCartState">
+            <div class="empty-icon">🍽️</div>
+            <h3 data-i18n="emptyCartTitle">Your Cart is Empty</h3>
+            <p data-i18n="emptyCartMsg">Select delicious dishes from the menu to build the customer's order.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bill Calculation Card -->
+      <div class="card bill-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="icon">💰</span> <span data-i18n="billCalcHeader">Bill Calculation & Taxes</span>
+          </h2>
+          <span class="tax-badge" data-i18n="ratesBadge">Disc 10% &bull; GST 5%</span>
+        </div>
+
+        <div class="bill-breakdown">
+          <div class="bill-row">
+            <span><span data-i18n="subtotalLabel">Subtotal</span> <small>[Σ(Price &times; Qty)]</small></span>
+            <span class="amount" id="dispSubtotal">₹0.00</span>
+          </div>
+          <div class="bill-row discount-row">
+            <span data-i18n="discountLabel">Discount (10% Demonstration)</span>
+            <span class="amount negative" id="dispDiscount">-₹0.00</span>
+          </div>
+          <div class="bill-row">
+            <span><span data-i18n="taxableLabel">Taxable Amount</span> <small data-i18n="taxableSub">(After Discount)</small></span>
+            <span class="amount" id="dispTaxable">₹0.00</span>
+          </div>
+          <div class="bill-row gst-row">
+            <span data-i18n="gstLabel">GST (5% Demonstration)</span>
+            <span class="amount positive" id="dispGst">+₹0.00</span>
+          </div>
+
+          <div class="final-total-box">
+            <div class="final-total-label">
+              <span data-i18n="finalPayableLabel">FINAL PAYABLE AMOUNT</span>
+              <small data-i18n="taxesIncluded">All taxes & discounts included</small>
+            </div>
+            <div class="final-total-amount" id="dispFinalAmount">₹0.00</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-grid">
+          <button class="btn btn-secondary" id="btnResetAll">
+            <span>🔄</span> <span data-i18n="btnNewOrder">New Order / Reset</span>
+          </button>
+          <button class="btn btn-primary" id="btnGenerateBill">
+            <span>🧾</span> <span data-i18n="btnGenerateBill">GENERATE BILL & RECEIPT</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer Info -->
+  <footer class="app-footer">
+    <p>Geetanjli Restaurant Bill Collector &bull; Object-Oriented Programming (Java & Web System)</p>
+    <p class="footer-meta">Demonstration Project &bull; Standard Defaults: 10% Discount, 5% GST</p>
+  </footer>
+
+  <!-- =========================================================================
+       RECEIPT MODAL DIALOG (Thermal Paper View)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="receipt-icon">🧾</span> <span data-i18n="receiptModalTitle">Official Bill Receipt</span>
+        </div>
+        <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="receipt-paper" id="receiptPaper">
+          <div class="receipt-header">
+            <div class="receipt-logo">⚜</div>
+            <h2 class="receipt-brand" data-i18n="appTitle">GEETANJLI RESTAURANT</h2>
+            <p class="receipt-tagline" data-i18n="receiptMotto">“Delicious Food, Wonderful Moments”</p>
+            <p class="receipt-address">Fine Dine & Hospitality | Ph: +91 98765 43210</p>
+            <div class="receipt-divider">==============================================</div>
+          </div>
+
+          <div class="receipt-meta-grid">
+            <div><strong data-i18n="recBillNo">Bill No:</strong> <span id="recBillNo">-</span></div>
+            <div style="text-align: right;"><strong data-i18n="recDate">Date:</strong> <span id="recDate">-</span></div>
+            <div><strong data-i18n="recCustomer">Customer:</strong> <span id="recCustomer">-</span></div>
+            <div style="text-align: right;"><strong data-i18n="recTable">Table No:</strong> <span id="recTable">-</span></div>
+            <div><strong data-i18n="recPhone">Contact:</strong> +91 <span id="recPhone">-</span></div>
+            <div style="text-align: right;"><strong data-i18n="recTime">Time:</strong> <span id="recTime">-</span></div>
+          </div>
+
+          <div class="receipt-divider">----------------------------------------------</div>
+          
+          <table class="receipt-items-table">
+            <thead>
+              <tr>
+                <th style="text-align: left; width: 48%;" data-i18n="colItem">ITEM</th>
+                <th style="text-align: right; width: 16%;" data-i18n="colPrice">PRICE</th>
+                <th style="text-align: center; width: 12%;" data-i18n="colQty">QTY</th>
+                <th style="text-align: right; width: 24%;" data-i18n="colTotal">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody id="recItemsBody"></tbody>
+          </table>
+
+          <div class="receipt-divider">----------------------------------------------</div>
+
+          <div class="receipt-calc-summary">
+            <div class="calc-row">
+              <span data-i18n="subtotalLabel">Subtotal:</span>
+              <span id="recSubtotal">₹0.00</span>
+            </div>
+            <div class="calc-row">
+              <span data-i18n="discountLabel">Discount (10%):</span>
+              <span id="recDiscount">-₹0.00</span>
+            </div>
+            <div class="calc-row">
+              <span data-i18n="taxableLabel">Taxable Amount:</span>
+              <span id="recTaxable">₹0.00</span>
+            </div>
+            <div class="calc-row">
+              <span data-i18n="gstLabel">GST (5%):</span>
+              <span id="recGst">+₹0.00</span>
+            </div>
+            <div class="receipt-divider">==============================================</div>
+            <div class="calc-row final-payable-row">
+              <span data-i18n="finalPayableLabel">FINAL PAYABLE:</span>
+              <span id="recFinalAmount">₹0.00</span>
+            </div>
+            <div class="receipt-divider">==============================================</div>
+          </div>
+
+          <div class="receipt-footer">
+            <p id="recPortionsCount">Total Items: 0 | Total Portions: 0</p>
+            <p data-i18n="taxesDisclaimer">Prices inclusive of demonstration taxes.</p>
+            <div class="receipt-thankyou">
+              <strong data-i18n="thankYouMsg">THANK YOU FOR DINING WITH US!</strong><br>
+              <span data-i18n="visitAgainMsg">Please Visit Geetanjli Restaurant Again!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCloseModal" data-i18n="btnClose">Close</button>
+        <button class="btn btn-accent" id="btnDownloadTxt">
+          <span>💾</span> <span data-i18n="btnDownloadTxt">Download .TXT Bill</span>
+        </button>
+        <button class="btn btn-primary" id="btnPrintReceipt">
+          <span>🖨️</span> <span data-i18n="btnPrintReceipt">Print Receipt</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>
